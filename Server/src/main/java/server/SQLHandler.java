@@ -1,6 +1,7 @@
 package server;
 
 import java.sql.*;
+import java.util.Date;
 
 public class SQLHandler {
 
@@ -81,4 +82,59 @@ public class SQLHandler {
         }
     }
 
+    public static boolean addMessage (String sender, String receiver, String text, Date date) {
+        try {
+            psAddMessage.setString(1,sender);
+            psAddMessage.setString(2,receiver);
+            psAddMessage.setString(3,text);
+            psAddMessage.setDate(4, (java.sql.Date) date);
+            psAddMessage.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static String getMessageForNick (String nick) {
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            psGetMessageForNick.setString(1,nick);
+            psGetMessageForNick.setString(2,nick);
+            ResultSet rs = psGetMessageForNick.executeQuery();
+
+            while (rs.next()) {
+                String sender = rs.getString(1);
+                String receiver = rs.getString(2);
+                String text = rs.getString(3);
+                Date date = rs.getDate(4);
+
+                if (receiver.equals("null")) {
+                    sb.append(String.format("%s : %s\n", sender, text));
+                } else {
+                    sb.append(String.format("[ %s ] private [ %s ]: %s\n", sender, receiver, text));
+                }
+            }
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
+    }
+
+    public static void disconnect() {
+        try {
+            psRegistration.close();
+            psGetNickname.close();
+            psChangeNick.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

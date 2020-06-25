@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Vector;
 
@@ -37,6 +38,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            SQLHandler.disconnect();
             try {
                 server.close();
             } catch (IOException e) {
@@ -46,6 +48,9 @@ public class Server {
     }
 
     public void broadcastMsg(String nick, String msg) {
+
+        SQLHandler.addMessage(nick, "null", msg, Calendar.getInstance().getTime());
+
         for (ClientHandler c : clients) {
             c.sendMsg(nick + ": " + msg);
         }
@@ -58,6 +63,7 @@ public class Server {
         for (ClientHandler c : clients) {
             if (c.getNick().equals(receiver)) {
                 c.sendMsg(message);
+                SQLHandler.addMessage(sender.getNick(), receiver, msg, Calendar.getInstance().getTime());
                 if (!sender.getNick().equals(receiver)) {
                     sender.sendMsg(message);
                 }
