@@ -12,6 +12,7 @@ public class SQLHandler {
 
     private static PreparedStatement psAddMessage;
     private static PreparedStatement psGetMessageForNick;
+    private static PreparedStatement psGetHistoryFromNick;
 
 
     public static boolean connect() {
@@ -39,6 +40,7 @@ public class SQLHandler {
                 "(SELECT id FROM users WHERE nickname=?),\n" +
                 "(SELECT id FROM users WHERE nickname=?),\n" +
                 "?, ?)");
+        psGetHistoryFromNick = connection.prepareStatement("SELECT * FROM messags WHERE sender = ? OR receiver = ?;");
     }
 
     public static String getNicknameByLoginAndPassword(String login, String password) {
@@ -121,6 +123,10 @@ public class SQLHandler {
             e.printStackTrace();
         }
         return sb.toString();
+    }
+
+    public static void getHistoryFromNick (String login) {
+        
     }
 
     public static void disconnect() {

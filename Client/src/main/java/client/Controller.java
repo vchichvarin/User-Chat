@@ -55,6 +55,8 @@ public class Controller implements Initializable {
     private boolean authenticated;
     private String nick;
 
+    private String login;
+
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
         authPanel.setVisible(!authenticated);
@@ -65,6 +67,7 @@ public class Controller implements Initializable {
         clientList.setManaged(authenticated);
         if (!authenticated) {
             nick = "";
+            History.stop();
         }
         textArea.clear();
         setTitle(nick);
@@ -111,6 +114,8 @@ public class Controller implements Initializable {
                         if (str.startsWith("/authok ")) {
                             nick = str.split(" ")[1];
                             setAuthenticated(true);
+                            textArea.appendText(History.getLast100LinesOfHistory(login));
+                            History.start(login);
                             break;
                         }
 
@@ -143,6 +148,7 @@ public class Controller implements Initializable {
 
                         } else {
                             textArea.appendText(str + "\n");
+                            History.writeLine(str);
                         }
                     }
                 } catch (IOException e) {
@@ -179,6 +185,7 @@ public class Controller implements Initializable {
 
         try {
             out.writeUTF("/auth " + loginField.getText().trim() + " " + passwordField.getText().trim());
+            login = loginField.getText();
             passwordField.clear();
         } catch (IOException e) {
             e.printStackTrace();

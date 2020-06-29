@@ -1,15 +1,20 @@
 package client;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.QuoteMode;
+import org.omg.CORBA.Environment;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.*;
 import java.util.List;
+import org.apache.commons.csv.CSVPrinter;
 
 public class History {
     private static PrintWriter out;
+    private static Connection connection;
+    private static PreparedStatement psGetHistory;
 
     private static String getHistoryFilenameByLogin(String login) {
         return "history/history_" + login + ".txt";
@@ -52,4 +57,39 @@ public class History {
         }
         return sb.toString();
     }
+
+    public static void getHistoryFromDB (String login) {
+        Connection c = null;
+        Statement stmt = null;
+        String filename = new String("csv/csv_" + login + ".csv");
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection("jdbc:sqlite:main.db");
+            stmt = c.createStatement();
+            String select_sql = "SELECT sender, receiver, text, date FROM messags IF sender = ? OR receiver = ?";
+            ResultSet resultSet = stmt.executeQuery(select_sql);
+
+            BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename));
+            CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT
+                    .withHeader(resultSet.getMetaData()).withQuoteMode(QuoteMode.ALL));
+            while (resultSet.next()) {
+                csvPrinter.printRecord(
+                        resultSet.getString(1),
+                        resultSet.getString(2),
+                        resultSet.getString(3),
+                        resultSet.getDate(4));
+            }
+
+            csvPrinter.flush();
+            csvPrinter.close();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
