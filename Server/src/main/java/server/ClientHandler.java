@@ -69,7 +69,7 @@ public class ClientHandler {
                                     System.out.println("Клиент: " + nick + " подключился"+ socket.getRemoteSocketAddress());
                                     socket.setSoTimeout(0);
 
-                                    sendMsg(SQLHandler.getMessageForNick(nick));
+//                                  sendMsg(SQLHandler.getMessageForNick(nick));
 
                                     break;
                                 } else {
