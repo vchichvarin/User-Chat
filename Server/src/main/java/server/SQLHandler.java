@@ -125,10 +125,6 @@ public class SQLHandler {
         return sb.toString();
     }
 
-    public static void getHistoryFromNick (String login) {
-        
-    }
-
     public static void disconnect() {
         try {
             psRegistration.close();

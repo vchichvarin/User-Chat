@@ -6,14 +6,22 @@ import java.net.Socket;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class Server {
     private List<ClientHandler> clients;
     private AuthService authService;
+    private ExecutorService executorService;
+
+    public ExecutorService getExecutorService() {
+        return executorService;
+    }
 
     public Server() {
         clients = new Vector<>();
+        executorService = Executors.newCachedThreadPool();
 
         if (!SQLHandler.connect()) {
             throw new RuntimeException("Не удалось подключиться к БД!");
@@ -39,6 +47,7 @@ public class Server {
             e.printStackTrace();
         } finally {
             SQLHandler.disconnect();
+            executorService.shutdown();
             try {
                 server.close();
             } catch (IOException e) {
